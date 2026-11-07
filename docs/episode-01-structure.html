@@ -1,0 +1,380 @@
+<title>어제뉴스 1화 큐시트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a broadcast rundown sheet. Timecode rail on the left, segments stacked, amber cue diamonds mark every kick. */
+:root {
+  --bg: #F1F4F7;
+  --surface: #FFFFFF;
+  --ink: #14202B;
+  --muted: #586776;
+  --rule: #D3DBE3;
+  --now: #1F4E8C;
+  --now-soft: #DDE7F4;
+  --past: #7A5634;
+  --past-soft: #F0E6DB;
+  --answer: #2C6B5A;
+  --answer-soft: #DCEDE7;
+  --kick: #B8650F;
+  --kick-soft: #FBEAD4;
+  --font-display: "Nanum Myeongjo", "AppleMyungjo", "Batang", serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F151B; --surface: #172029; --ink: #E5EBF1; --muted: #9AA8B6; --rule: #2A3743;
+    --now: #7EAEEA; --now-soft: #1C2D42; --past: #D2A97E; --past-soft: #33261A;
+    --answer: #73C6AC; --answer-soft: #18332B; --kick: #F2A350; --kick-soft: #3A2814;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F151B; --surface: #172029; --ink: #E5EBF1; --muted: #9AA8B6; --rule: #2A3743;
+  --now: #7EAEEA; --now-soft: #1C2D42; --past: #D2A97E; --past-soft: #33261A;
+  --answer: #73C6AC; --answer-soft: #18332B; --kick: #F2A350; --kick-soft: #3A2814;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: clamp(26px, 4.4vw, 40px); font-weight: 800; }
+h2 { font-size: 22px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--now); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.label { font-size: 12px; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+section { display: grid; gap: 16px; }
+.lede { color: var(--muted); max-width: 65ch; }
+
+/* header */
+header { display: grid; gap: 14px; }
+.slug { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--muted); }
+.slug .mono { color: var(--ink); }
+.titles { display: grid; gap: 6px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+.titles .t-main { font-family: var(--font-display); font-weight: 800; font-size: clamp(18px, 2.6vw, 22px); }
+.titles .t-sub { color: var(--muted); }
+.newsbox { display: grid; gap: 8px; border-left: 3px solid var(--now); padding: 4px 0 4px 16px; max-width: 70ch; }
+
+/* device legend */
+.devices { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.device { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.device .name { font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.device p { color: var(--muted); font-size: 14px; }
+.diamond { width: 11px; height: 11px; background: var(--kick); transform: rotate(45deg); display: inline-block; flex: none; }
+.diamond.hook { background: var(--now); }
+.diamond.loop { background: var(--answer); }
+
+/* timeline */
+.tl-scroll { overflow-x: auto; padding-bottom: 6px; }
+.timeline { min-width: 760px; display: grid; gap: 10px; }
+.bar { display: flex; height: 54px; border-radius: 4px; overflow: hidden; border: 1px solid var(--rule); }
+.seg { display: flex; flex-direction: column; justify-content: center; padding: 0 8px; font-size: 12px; line-height: 1.3; min-width: 0; border-right: 1px solid var(--surface); }
+.seg:last-child { border-right: 0; }
+.seg b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seg span { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seg.now { background: var(--now-soft); }
+.seg.past { background: var(--past-soft); }
+.seg.answer { background: var(--answer-soft); }
+.kicks { position: relative; height: 70px; }
+.kicks .k { position: absolute; top: 0; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; width: 84px; text-align: center; }
+.kicks .k .diamond { margin-top: 2px; }
+.kicks .k .mono { font-size: 11px; color: var(--muted); }
+.kicks .k .kt { font-size: 11px; line-height: 1.25; }
+.ticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.key i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 6px; }
+
+/* rundown */
+.rundown { display: grid; gap: 14px; }
+.cue { display: grid; grid-template-columns: 112px minmax(0, 1fr); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.cue .tc { padding: 16px 14px; border-right: 1px solid var(--rule); display: grid; align-content: start; gap: 4px; }
+.cue .tc .mono { font-size: 15px; }
+.cue .tc .len { font-size: 12px; color: var(--muted); }
+.cue.now .tc { background: var(--now-soft); }
+.cue.past .tc { background: var(--past-soft); }
+.cue.answer .tc { background: var(--answer-soft); }
+.cue .body { padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.cue .body ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.say { margin: 0; padding: 12px 14px; border-radius: 4px; background: var(--bg); font-size: 15px; line-height: 1.75; }
+.say::before { content: "대사"; display: block; font-size: 11px; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.screen { font-size: 13px; color: var(--muted); }
+.screen b { color: var(--ink); font-weight: 600; }
+.kickrow { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 4px; background: var(--kick-soft); font-size: 14px; }
+.kickrow .diamond { margin-top: 6px; }
+.kickrow.hook { background: var(--now-soft); }
+.kickrow.hook .diamond { background: var(--now); }
+.kickrow.loop { background: var(--answer-soft); }
+.kickrow.loop .diamond { background: var(--answer); }
+.kickrow .mono { font-size: 12px; color: var(--muted); margin-right: 6px; }
+.flag { font-size: 11px; font-weight: 600; color: var(--kick); border: 1px solid var(--kick); border-radius: 3px; padding: 0 5px; margin-left: 4px; white-space: nowrap; }
+
+/* escalation chart */
+.chart { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 12px; }
+.row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 92px; gap: 12px; align-items: center; font-size: 14px; }
+.row .track { height: 16px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+.row .fill { height: 100%; background: var(--past); min-width: 2px; }
+.row:last-child .fill { background: var(--kick); }
+.row .v { text-align: right; }
+.note { font-size: 13px; color: var(--muted); }
+
+/* lists */
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.panel ol, .panel ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; background: var(--surface); }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 12px; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.ok { color: var(--answer); font-weight: 600; white-space: nowrap; }
+.todo { color: var(--kick); font-weight: 600; white-space: nowrap; }
+.sources { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+
+@media (max-width: 560px) {
+  .cue { grid-template-columns: 1fr; }
+  .cue .tc { border-right: 0; border-bottom: 1px solid var(--rule); display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .row { grid-template-columns: 100px minmax(0, 1fr) 70px; font-size: 13px; }
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="slug"><span class="label">어제뉴스 · 샘플 1화 · 큐시트</span><span>길이 <span class="mono">15:00</span></span><span>제작 기준일 <span class="mono">2026-11-07</span></span></div>
+  <h1>20분에 8조 원, 북한은 어떻게 ‘국가 도둑’이 됐나</h1>
+  <div class="titles">
+    <span class="label">제목 후보</span>
+    <span class="t-main">⏪ 20분에 8조… 북한은 원래 달러를 ‘찍던’ 나라였다 / ⏪ 바이낸스 해킹의 50년 뿌리</span>
+    <span class="t-sub">앞은 클릭용, 뒤는 검색용. ⏪는 “어제를 되감는다”는 채널 기호 제안</span>
+  </div>
+  <div class="newsbox">
+    <span class="label">출발 뉴스</span>
+    <p>10월 29일 세계 최대 코인 거래소 바이낸스에서 약 63억 달러(약 8조 4천억 원)가 빠져나갔다. 대부분 약 20분 만에 이동했다. FBI는 10월 31일 북한 해킹 조직 ‘트레이더트레이터’를 배후로 지목했다. 북한은 김여정 담화로 “황당무계한 낭설”이라고 부인했다.</p>
+  </div>
+</header>
+
+<section>
+  <h2>시청자를 붙잡는 세 가지 장치</h2>
+  <div class="devices">
+    <div class="device"><span class="name"><i class="diamond hook"></i>훅</span><p>처음 30초. 클릭한 사람이 바로 나가지 않게 만든다. 숫자 충격, 의외의 연결, 질문 중 하나로 연다.</p></div>
+    <div class="device"><span class="name"><i class="diamond"></i>킥</span><p>약 2분마다 하나. 떠나려는 사람을 다시 붙잡는다. 의외의 사실, 반전, 숫자 비교, 나란히 놓기의 네 종류를 섞어 쓴다.</p></div>
+    <div class="device"><span class="name"><i class="diamond loop"></i>루프</span><p>마지막 20초. 답하지 않은 질문 하나를 남겨 다음 영상으로 넘긴다.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>전개도</h2>
+  <p class="lede">파란색은 지금의 뉴스, 갈색은 과거, 초록색은 질문에 대한 답이다. 뉴스에서 출발해 과거로 내려갔다가, 답을 들고 다시 뉴스로 돌아오는 U자 구조다.</p>
+  <div class="tl-scroll">
+    <div class="timeline">
+      <div class="kicks" aria-label="킥 위치">
+        <div class="k" style="left:0.6%"><i class="diamond hook"></i><span class="mono">0:00</span><span class="kt">20분 8조</span></div>
+        <div class="k" style="left:15.6%"><i class="diamond"></i><span class="mono">2:20</span><span class="kt">외교관 가방</span></div>
+        <div class="k" style="left:27.8%"><i class="diamond"></i><span class="mono">4:10</span><span class="kt">달러를 찍다</span></div>
+        <div class="k" style="left:36.7%"><i class="diamond"></i><span class="mono">5:30</span><span class="kt">마카오 은행</span></div>
+        <div class="k" style="left:50%"><i class="diamond"></i><span class="mono">7:30</span><span class="kt">수출산업</span></div>
+        <div class="k" style="left:64.4%"><i class="diamond"></i><span class="mono">9:40</span><span class="kt">오타 하나</span></div>
+        <div class="k" style="left:73.3%"><i class="diamond"></i><span class="mono">11:00</span><span class="kt">10년에 78배</span></div>
+        <div class="k" style="left:87.8%"><i class="diamond"></i><span class="mono">13:10</span><span class="kt">같은 사건 다른 말</span></div>
+        <div class="k" style="left:97.6%"><i class="diamond loop"></i><span class="mono">14:40</span><span class="kt">쓸 수 있을까?</span></div>
+      </div>
+      <div class="bar">
+        <div class="seg now" style="width:3.33%"><b>①</b></div>
+        <div class="seg now" style="width:3.33%"><b>②</b></div>
+        <div class="seg past" style="width:33.33%"><b>③ 과거 1막</b><span>훔치고, 찍고, 빼앗기다</span></div>
+        <div class="seg past" style="width:20%"><b>④ 과거 2막</b><span>왜 하필 북한인가</span></div>
+        <div class="seg answer" style="width:16.67%"><b>⑤ 답</b><span>은행에서 코인으로</span></div>
+        <div class="seg now" style="width:16.67%"><b>⑥ 지금</b><span>FBI 발표 이후</span></div>
+        <div class="seg now" style="width:6.67%"><b>⑦</b><span>다음</span></div>
+      </div>
+      <div class="ticks mono"><span>0:00</span><span>3:00</span><span>6:00</span><span>9:00</span><span>12:00</span><span>15:00</span></div>
+    </div>
+  </div>
+  <div class="key"><span><i style="background:var(--now-soft);border:1px solid var(--now)"></i>지금의 뉴스</span><span><i style="background:var(--past-soft);border:1px solid var(--past)"></i>과거</span><span><i style="background:var(--answer-soft);border:1px solid var(--answer)"></i>답</span></div>
+</section>
+
+<section>
+  <h2>구간별 큐시트</h2>
+  <p class="lede"><span class="flag">확인 필요</span> 표시는 대본 확정 전에 원문 사료로 검증할 항목이다. 표시가 없는 현재 뉴스 수치는 아래 출처에서 확인했다.</p>
+  <div class="rundown">
+
+    <article class="cue now">
+      <div class="tc"><span class="mono">0:00</span><span class="len">30초 · ① 훅</span></div>
+      <div class="body">
+        <h3>20분, 8조 4천억</h3>
+        <p class="say">10월 29일, 단 20분. 세계 최대 코인 거래소에서 8조 4천억 원이 빠져나갔습니다. FBI가 지목한 범인은 북한입니다. 그런데 북한이 작년 한 해 동안 수출한 물건을 전부 합쳐도 6천억 원대입니다. 20분 만에 13년치 수출을 번 셈이죠.</p>
+        <p class="screen"><b>화면</b> 20:00에서 0으로 떨어지는 타이머. 이어서 8.4조 막대 옆에 북한 연간 수출 막대를 나란히 세운다.</p>
+        <div class="kickrow hook"><i class="diamond"></i><span><span class="mono">0:00</span>숫자 충격. “13년치”는 탈취액 63억 달러를 북한의 2025년 상품 수출액 4억 6,859만 달러(KOTRA)로 나눈 값이다.</span></div>
+      </div>
+    </article>
+
+    <article class="cue now">
+      <div class="tc"><span class="mono">0:30</span><span class="len">30초 · ② 질문</span></div>
+      <div class="body">
+        <h3>이 영상이 답할 두 가지</h3>
+        <p class="say">이상하지 않으세요? 인터넷도 제대로 안 되는 나라가 어떻게 세계 최고의 해커 국가가 됐을까요. 그리고 왜 하필 코인일까요. 답은 50년 전, 외교관의 가방에서 시작됩니다.</p>
+        <p class="screen"><b>화면</b> 질문 두 개를 자막으로 띄우고 ⑤에서 답할 때 다시 불러온다.</p>
+      </div>
+    </article>
+
+    <article class="cue past">
+      <div class="tc"><span class="mono">1:00</span><span class="len">5분 · ③ 과거 1막</span></div>
+      <div class="body">
+        <h3>달러를 훔치고, 찍고, 빼앗기다</h3>
+        <ul>
+          <li>1976년, 북유럽 여러 나라에서 북한 외교관들이 술·담배 밀수로 추방된다 <span class="flag">확인 필요</span></li>
+          <li>1970년대, 김씨 일가의 통치 자금을 버는 ‘39호실’이 생긴다 <span class="flag">확인 필요</span></li>
+          <li>1989년, 정교한 위조 100달러 ‘슈퍼노트’가 필리핀에서 처음 발견된다 <span class="flag">확인 필요</span></li>
+          <li>2005년, 미국이 마카오 방코델타아시아를 돈세탁 우려 은행으로 지정하고 북한 자금 약 2,500만 달러가 묶인다 <span class="flag">확인 필요</span></li>
+        </ul>
+        <p class="say">북한을 가장 아프게 한 건 미사일 방어망이 아니었습니다. 마카오의 작은 은행 하나였죠. 미국이 이 은행을 찍자 다른 은행들까지 북한 돈을 피하기 시작합니다. 북한은 이때 확실히 배웁니다. 달러 시스템 안에 있으면 언제든 막힌다.</p>
+        <p class="screen"><b>화면</b> 평양에서 북유럽, 마닐라, 마카오로 선이 뻗어 나가는 지도. 연도 자막.</p>
+        <div class="kickrow"><i class="diamond"></i><span><span class="mono">2:20</span>의외의 시작. 국가 범죄의 출발점이 해커가 아니라 외교관의 가방이었다.</span></div>
+        <div class="kickrow"><i class="diamond"></i><span><span class="mono">4:10</span>의외의 사실. 남의 나라 돈을 직접 찍어낸 나라.</span></div>
+        <div class="kickrow"><i class="diamond"></i><span><span class="mono">5:30</span>반전. 2,500만 달러짜리 동결이 미사일보다 아팠다. 여기서 “달러 밖의 돈”이라는 영상 전체의 열쇠가 나온다.</span></div>
+      </div>
+    </article>
+
+    <article class="cue past">
+      <div class="tc"><span class="mono">6:00</span><span class="len">3분 · ④ 과거 2막</span></div>
+      <div class="body">
+        <h3>왜 하필 북한이 잘하나</h3>
+        <ul>
+          <li>잃을 게 없는 나라. 이미 제재로 무역과 신용이 거의 없어서 추가 처벌이 잘 통하지 않는다</li>
+          <li>비용 구조. 공장도 항구도 필요 없다. 적은 인원과 노트북, 해외 인터넷 회선이면 된다</li>
+          <li>인재 파이프라인. 어릴 때 수학 영재를 뽑아 컴퓨터 인력으로 키우는 체계 <span class="flag">확인 필요</span></li>
+        </ul>
+        <p class="say">다른 나라에게 해킹은 범죄입니다. 북한에게는 수출산업입니다.</p>
+        <p class="screen"><b>화면</b> 일반 국가와 북한의 “해킹 손익계산서”를 나란히 놓은 표.</p>
+        <div class="kickrow"><i class="diamond"></i><span><span class="mono">7:30</span>관점 전환. 같은 행위가 나라에 따라 완전히 다른 의미가 된다는 한 줄. 썸네일 문구 후보이기도 하다.</span></div>
+      </div>
+    </article>
+
+    <article class="cue answer">
+      <div class="tc"><span class="mono">9:00</span><span class="len">2분 30초 · ⑤ 답</span></div>
+      <div class="body">
+        <h3>은행에서 코인으로</h3>
+        <ul>
+          <li>2014년 소니 픽처스 해킹으로 능력을 처음 세상에 드러낸다</li>
+          <li>2016년 방글라데시 중앙은행. 9억 5,100만 달러를 노렸고 8,100만 달러를 빼냈다</li>
+          <li>2022년 로닌 브리지 약 6억 2천만 달러, 2025년 바이비트 약 14억 6천만 달러, 2026년 바이낸스 약 63억 달러</li>
+          <li>코인에는 국경도, 영업시간도, 동결해 줄 은행도 없다. 2005년의 마카오 은행 같은 급소가 없는 돈이다</li>
+        </ul>
+        <p class="say">2016년, 북한 해커들은 방글라데시 중앙은행에서 1조 원 넘게 빼내려 했습니다. 그런데 송금 서류에 ‘재단’을 뜻하는 영어 단어 철자가 틀려 있었죠. 이 오타 하나 때문에 2천만 달러가 되돌아옵니다.</p>
+        <p class="say">그리고 10년 뒤, 이들은 더 이상 오타를 내지 않습니다.</p>
+        <div class="kickrow"><i class="diamond"></i><span><span class="mono">9:40</span>의외의 사실. 오타가 지킨 돈 <span class="flag">확인 필요</span></span></div>
+        <div class="kickrow"><i class="diamond"></i><span><span class="mono">11:00</span>숫자 비교. 10년 만에 한 번에 터는 규모가 78배가 됐다. 아래 그래프를 화면에 그대로 쓴다.</span></div>
+        <p class="screen"><b>화면</b> ②의 질문 두 개를 다시 띄우고 답을 한 줄씩 채운다. ① 잃을 게 없는 나라가 50년간 키운 국가사업. ② 달러에서 쫓겨난 뒤 찾은, 막을 수 없는 돈.</p>
+      </div>
+    </article>
+
+    <article class="cue now">
+      <div class="tc"><span class="mono">11:30</span><span class="len">2분 30초 · ⑥ 지금</span></div>
+      <div class="body">
+        <h3>FBI 발표 이후</h3>
+        <ul>
+          <li>FBI는 10월 31일 트레이더트레이터를 지목하고 관련 지갑 주소 628개를 공개했다. 탈취 자산은 주로 이더리움으로 바뀌는 중이다</li>
+          <li>바이낸스는 피해액의 약 95%를 자체 자금으로 메웠다고 밝혔다</li>
+          <li>한국에 주는 의미. 국내 거래소와 투자자의 보안, 그리고 이 돈이 어디에 쓰이는가 <span class="flag">확인 필요</span></li>
+        </ul>
+        <p class="say">같은 사건을 두고 세 곳에서 서로 다른 말이 나왔습니다. FBI는 북한이라고 했고, 트럼프 대통령은 “북한인지 모른다”고 했고, 김여정은 “황당무계한 낭설”이라고 했습니다.</p>
+        <div class="kickrow"><i class="diamond"></i><span><span class="mono">13:10</span>나란히 놓기. 세 발언을 판단 없이 화면에 나란히 띄운다. 해석은 시청자 몫으로 둔다.</span></div>
+      </div>
+    </article>
+
+    <article class="cue now">
+      <div class="tc"><span class="mono">14:00</span><span class="len">1분 · ⑦ 다음에 볼 것</span></div>
+      <div class="body">
+        <h3>앞으로 확인할 세 가지</h3>
+        <ol style="margin:0;padding-left:20px;display:grid;gap:4px">
+          <li>세탁 경로. 이더리움으로 바꾼 돈이 실제로 현금이 되는지</li>
+          <li>미국의 대응. 제재 강화와 북미 대화 가운데 어느 쪽으로 가는지</li>
+          <li>거래소 보안. 이번 침투 경로가 밝혀지면 다른 거래소에도 같은 구멍이 있는지</li>
+        </ol>
+        <div class="kickrow loop"><i class="diamond"></i><span><span class="mono">14:40</span>루프. “그런데 8조 원어치 코인, 북한은 정말 쓸 수 있을까요? 다음 편에서 돈세탁 경로를 따라가 보겠습니다.”</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <h2>10년 만에 78배</h2>
+  <p class="lede">⑤ 구간 11:00에 쓰는 그래프. 북한 소행으로 지목된 대표 사건의 탈취액을 같은 축척으로 그렸다.</p>
+  <div class="chart" role="img" aria-label="북한 지목 탈취 사건 규모 비교">
+    <div class="row"><span>2016 방글라데시 은행</span><div class="track"><div class="fill" style="width:1.29%"></div></div><span class="v mono">0.81억 달러</span></div>
+    <div class="row"><span>2022 로닌 브리지</span><div class="track"><div class="fill" style="width:9.84%"></div></div><span class="v mono">6.2억 달러</span></div>
+    <div class="row"><span>2025 바이비트</span><div class="track"><div class="fill" style="width:23.17%"></div></div><span class="v mono">14.6억 달러</span></div>
+    <div class="row"><span>2026 바이낸스</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="v mono">63억 달러</span></div>
+    <p class="note">63억 ÷ 0.81억 ≈ 78배. 방글라데시는 실제로 빼낸 금액 기준이다. 로닌 수치는 대본 확정 전에 FBI 발표 원문으로 재확인한다.</p>
+  </div>
+</section>
+
+<section class="cols">
+  <div class="panel">
+    <h3>이 영상에서 쇼츠 3개</h3>
+    <ol>
+      <li><b>북한은 원래 달러를 찍던 나라</b> · 슈퍼노트 1분 요약</li>
+      <li><b>오타 하나가 지킨 2천만 달러</b> · 방글라데시 은행 사건</li>
+      <li><b>20분에 8조, 13년치 수출</b> · 훅 구간 그대로</li>
+    </ol>
+  </div>
+  <div class="panel">
+    <h3>지킬 선</h3>
+    <ul>
+      <li>북한 주민과 정권을 구분해서 말한다</li>
+      <li>트럼프 발언은 인용만 하고 평가하지 않는다</li>
+      <li>“확인 필요” 항목은 원문 사료로 검증하기 전까지 대본에 확정 표현으로 쓰지 않는다</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>팩트체크 목록</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>주장</th><th>상태</th><th>근거</th></tr></thead>
+      <tbody>
+        <tr><td>10월 29일 바이낸스에서 약 63억 달러 탈취, 대부분 약 20분 만에 이동</td><td class="ok">확인</td><td>BleepingComputer, PBS, 머니투데이</td></tr>
+        <tr><td>FBI가 10월 31일 트레이더트레이터 지목, 지갑 주소 628개 공개, 이더리움 전환 정황</td><td class="ok">확인</td><td>The Hacker News, 한국일보</td></tr>
+        <tr><td>바이낸스가 피해액의 약 95% 보전</td><td class="ok">확인</td><td>The Hacker News</td></tr>
+        <tr><td>트럼프 “북한인지 모른다”, 김여정 “황당무계한 낭설”</td><td class="ok">확인</td><td>NBC News, 뉴스핌</td></tr>
+        <tr><td>북한 2025년 상품 수출액 4억 6,859만 달러</td><td class="ok">확인</td><td>경북매일(KOTRA 집계 인용)</td></tr>
+        <tr><td>2025년 바이비트 약 14억 6천만 달러, 같은 조직 소행</td><td class="ok">확인</td><td>The Hacker News</td></tr>
+        <tr><td>2016년 방글라데시 은행 9억 5,100만 달러 시도, 8,100만 달러 탈취</td><td class="ok">확인</td><td>RFA(미 법무부 기소장 인용)</td></tr>
+        <tr><td>스리랑카행 2천만 달러가 철자 오류로 되돌아옴</td><td class="todo">확인 필요</td><td>로이터 등 당시 보도 원문</td></tr>
+        <tr><td>1976년 북유럽 외교관 밀수 추방</td><td class="todo">확인 필요</td><td>당시 외신, 학술 자료</td></tr>
+        <tr><td>39호실의 설립 시기와 역할</td><td class="todo">확인 필요</td><td>미 재무부 제재 자료, 연구서</td></tr>
+        <tr><td>슈퍼노트 1989년 필리핀 첫 발견</td><td class="todo">확인 필요</td><td>미 의회조사국(CRS) 보고서</td></tr>
+        <tr><td>2005년 방코델타아시아 지정, 약 2,500만 달러 동결</td><td class="todo">확인 필요</td><td>미 재무부 FinCEN 발표</td></tr>
+        <tr><td>2022년 로닌 브리지 약 6억 2천만 달러, FBI 지목</td><td class="todo">확인 필요</td><td>FBI 2022년 발표</td></tr>
+        <tr><td>북한 인재 양성 체계, 탈취 자금의 무기 개발 전용</td><td class="todo">확인 필요</td><td>유엔 대북제재위원회 전문가 패널 보고서</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sources">
+    <span class="label">출처</span>
+    <a href="https://www.bleepingcomputer.com/news/security/fbi-links-63-billion-binance-crypto-heist-to-north-korean-hackers/">BleepingComputer · FBI links $6.3 billion Binance crypto heist to North Korean hackers</a>
+    <a href="https://thehackernews.com/2026/11/fbi-links-north-koreas-tradertraitor-to.html">The Hacker News · FBI Links North Korea's TraderTraitor to Record Binance Crypto Heist</a>
+    <a href="https://www.pbs.org/newshour/world/fbi-says-north-korea-was-behind-6-3-billion-binance-heist-the-biggest-crypto-hack-in-history">PBS NewsHour · biggest crypto hack in history</a>
+    <a href="https://www.nbcnews.com/world/asia/north-korea-denies-involvement-binance-hack-rcna607168">NBC News · North Korea denies involvement in Binance hack</a>
+    <a href="https://www.mt.co.kr/world/2026/11/02/2026110122225096026">머니투데이 · 20분 만에 세계 최대 코인거래소 뚫은 北 해커</a>
+    <a href="https://www.hankookilbo.com/news/article/A2026110108270004242">한국일보 · 8.4조 가상화폐 해킹 배후는 북한</a>
+    <a href="https://www.newspim.com/news/view/20261103000037">뉴스핌 · 北, 8조원대 암호화폐 탈취 발뺌</a>
+    <a href="https://www.kbmaeil.com/article/20261102500009">경북매일 · 북한 상품 수출액(KOTRA) 인용 기사</a>
+    <a href="https://www.rfa.org/english/news/korea/theft-02172021192646.html">RFA · US Charges Three North Korean Spies</a>
+    <a href="https://thediplomat.com/2026/11/6b-binance-heist-exposes-how-north-korea-turned-hacking-into-a-state-revenue-stream/">The Diplomat · How North Korea Turned Hacking Into a State Revenue Stream</a>
+  </div>
+</section>
+
+</div>
