@@ -1,4 +1,45 @@
-# 뉴과 1화 가이드 음원
+# 뉴과 1화 음원
+
+## 🎙️ 최종본: 타입캐스트 · 민욱 (만드는 법)
+
+`scripts/typecast_narration.py`가 녹음 원고 전체를 민욱 목소리로 읽혀 **파일 하나**로 만든다.
+타입캐스트 공식 API 형식(api.typecast.ai, X-API-KEY 헤더, /v3/voices, /v1/text-to-speech)을 따른다.
+
+- 민욱을 이름으로 찾는다 (`--voice-id`로 직접 지정 가능)
+- API가 한 번에 2,000자까지만 받으므로 문단 단위로 3개 구간으로 나눠 보낸다. 모든 구간을 같은 목소리·모델(ssfm-v30)·감정·속도로 생성한다
+- 0.6초 쉼을 넣어 WAV 하나로 이어 붙인다. ffmpeg가 있으면 MP3도 만든다
+- 중간에 끊기면 다시 실행할 때 이미 만든 구간은 건너뛴다
+
+**천하장부에서 타입캐스트가 되던 곳에서 실행한다.** 그곳에 동작하는 API 키가 있다.
+
+```
+git clone -b ccr-302acc2b-69jbsk https://github.com/iam55055-cell/-.git nyugwa
+cd nyugwa
+python scripts/typecast_narration.py docs/episode-01-recording.txt
+```
+
+API 키는 환경 변수 `TYPECAST_API_KEY`로 읽는다.
+
+| 옵션 | 기본값 | 설명 |
+|---|---|---|
+| `--tempo` | 1.0 | 속도. 너무 빠르면 0.9~0.95 |
+| `--emotion` | normal | normal, happy, sad, angry, whisper, toneup, tonedown |
+| `--intensity` | 1.0 | 감정 세기 0~2 |
+| `--gap` | 0.6 | 구간 사이 쉼(초) |
+| `--dry-run` | — | API를 부르지 않고 구간 나누기만 확인 |
+
+결과: `outputs/episode-01-recording-민욱.wav` (+ `.mp3`)
+
+### 이 클라우드 세션에서 안 되는 이유 (2026-11-08 확인)
+
+- 이 환경에 저장된 타입캐스트 키는 공식 주소 /v1, /v2, /v3 어디에서나 `AUTH_TOKEN_INVALID`(401)로 거절된다
+- 키 자체는 api.typecast.ai 요청에 X-API-KEY 헤더로 정상 첨부되고 있다. 즉 연결 방식이 아니라 저장된 키 값이 문제다
+- 계정의 다른 클라우드 환경(earshot, 총판자료)에는 타입캐스트 키가 없고, 이 세션에 연결된 컴퓨터 폴더도 없다. 천하장부의 동작하는 설정은 이 세션 밖에 있다
+- 타입캐스트용 공식 Claude 플러그인·커넥터는 없다. Neosapience가 GitHub에 공식 스킬(neosapience/typecast-skills)과 MCP 서버(neosapience/typecast-api-mcp-server)를 공개했지만, 둘 다 같은 API 키가 필요하다
+
+---
+
+# 가이드 음원 (마커스, 임시)
 
 ## ✅ 전체 한 파일 (v2, 2026-11-08) — 이 파일을 쓴다
 
