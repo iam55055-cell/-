@@ -305,4 +305,5 @@ Higgsfield voice_id: H `ed69c516…`, I `dc382508…`, J `ef70cc83…`, K `1ad38
 | 원고 말투 | 대화체. “자,”, “네,”, “아,”, “음,”, “그런데요,” 같은 말 붙임을 문단마다 한두 개 넣는다 (1화 v2 원고 기준) |
 | 음량 보정 | 압축(−30dB, 3:1) 후 −16 LUFS로 맞춤. `scripts/typecast_narration.py`가 자동으로 한다 |
 | 후반 효과 프리셋 | 2-3장 표 |
-| 확정일 | 미정 |
+| 등록 위치 | `library/voice/nyugwa-master/` (설정 `preset.json`, 마스터 레퍼런스 `reference-1min.mp3`, 긴 호흡 레퍼런스 `reference-full-episode01.mp3`) |
+| 확정일 | **2026-11-08** |

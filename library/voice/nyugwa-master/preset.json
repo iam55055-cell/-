@@ -1,0 +1,24 @@
+{
+  "name": "뉴과 마스터 보이스",
+  "registered": "2026-11-08",
+  "source": "타입캐스트 · 민욱 (Minuk, 남성 중년, Conversational / Radio·Podcast)",
+  "typecast": {
+    "voice_name": "민욱",
+    "voice_id": "tc_68f0727fd62a5934102f7ec0",
+    "model": "ssfm-v30",
+    "emotion": "normal",
+    "intensity": 1.0,
+    "tempo": 0.85,
+    "stretch": 1.0588,
+    "pitch": 0,
+    "gap": 0.6,
+    "max_chars": 600,
+    "lufs": -16.0
+  },
+  "notes": {
+    "final_speed": "0.9 (tempo 0.85로 생성 후 음높이 유지한 채 5.9% 빠르게)",
+    "style": "대화체. 문단마다 '자,', '네,', '아,', '음,', '그런데요,' 같은 말 붙임을 한두 개. 물결표(~) 대신 쉼표와 말줄임표(…)",
+    "mastering": "highpass 70Hz → 압축 −30dB 3:1 → 두 번 측정 loudnorm −16 LUFS, TP −1.5",
+    "history": "속도 1.0 빠름 → 0.85 늘어짐 → 0.9 확정 (2026-11-08, 1화 v2)"
+  }
+}

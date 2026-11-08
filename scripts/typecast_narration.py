@@ -12,7 +12,10 @@
 필요한 것: 파이썬 3.8 이상. 추가 설치 없음 (표준 라이브러리만 사용).
 API 키: 환경 변수 TYPECAST_API_KEY
 
-사용법:
+사용법 (뉴과 마스터 보이스 설정으로):
+    python scripts/typecast_narration.py 원고.txt --preset library/voice/nyugwa-master/preset.json
+
+그 밖의 예:
     python scripts/typecast_narration.py docs/episode-01-recording.txt
     python scripts/typecast_narration.py docs/episode-01-recording-v2.txt --tempo 0.85
     python scripts/typecast_narration.py docs/episode-01-recording.txt --dry-run
@@ -218,6 +221,13 @@ def main() -> None:
                          "타입캐스트 --tempo가 0.85와 0.9를 거의 구분하지 못해서 쓴다")
     ap.add_argument("--no-master", action="store_true", help="음량 보정을 하지 않음")
     ap.add_argument("--dry-run", action="store_true", help="API를 부르지 않고 나누기 결과만 보기")
+    ap.add_argument("--preset", type=Path,
+                    help="목소리 설정 파일 (예: library/voice/nyugwa-master/preset.json). "
+                         "파일의 값이 기본값이 되고, 명령줄에 직접 준 옵션이 우선한다")
+    pre, _ = ap.parse_known_args()
+    if pre.preset:
+        cfg = json.loads(pre.preset.read_text(encoding="utf-8"))["typecast"]
+        ap.set_defaults(**{k: v for k, v in cfg.items() if k in vars(pre)})
     args = ap.parse_args()
 
     text = args.script.read_text(encoding="utf-8")
