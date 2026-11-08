@@ -6,14 +6,15 @@
 - 목소리는 이름(기본 "민욱")으로 찾는다. --voice-id 로 직접 지정할 수도 있다.
 - API는 한 번에 2,000자까지만 받으므로 문단 단위로 나눠 보낸다.
   모든 구간을 같은 목소리·모델·감정·속도로 생성해서 톤을 맞춘다.
-- 구간들을 이어 붙여 WAV 하나로 저장한다. ffmpeg가 있으면 MP3도 만든다.
+- 구간들을 이어 붙여 WAV 하나로 저장한다. ffmpeg가 있으면 음량을 고르게
+  보정한 파일(-master.wav)과 MP3도 만든다.
 
 필요한 것: 파이썬 3.8 이상. 추가 설치 없음 (표준 라이브러리만 사용).
 API 키: 환경 변수 TYPECAST_API_KEY
 
 사용법:
     python scripts/typecast_narration.py docs/episode-01-recording.txt
-    python scripts/typecast_narration.py docs/episode-01-recording.txt --tempo 0.95
+    python scripts/typecast_narration.py docs/episode-01-recording-v2.txt --tempo 0.85
     python scripts/typecast_narration.py docs/episode-01-recording.txt --dry-run
 """
 
@@ -175,6 +176,27 @@ def join_wavs(parts: list[bytes], out: Path, gap_sec: float) -> float:
         return r.getnframes() / r.getframerate()
 
 
+# 문장 끝이 작아지거나 중간에 소리가 잠깐 줄어드는 것을 고르게 만든다.
+# 1) 70Hz 아래 웅웅거림 제거  2) 부드러운 압축으로 큰 소리와 작은 소리 차이를 줄임
+# 3) 유튜브 기준 음량(-16 LUFS)으로 맞춤. 두 번 측정해서 음량이 출렁이지 않게 한다.
+LEVELER = "highpass=f=70,acompressor=threshold=-30dB:ratio=3:attack=8:release=150:makeup=2"
+
+
+def master(src: Path, dst: Path, lufs: float) -> None:
+    target = f"I={lufs}:TP=-1.5:LRA=7"
+    probe = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-nostats", "-i", str(src), "-af",
+         f"{LEVELER},loudnorm={target}:print_format=json", "-f", "null", "-"],
+        capture_output=True, text=True, check=True).stderr
+    m = json.loads(probe[probe.rindex("{"):probe.rindex("}") + 1])
+    second = (f"{LEVELER},loudnorm={target}:linear=true"
+              f":measured_I={m['input_i']}:measured_TP={m['input_tp']}"
+              f":measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}"
+              f":offset={m['target_offset']}")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-af", second,
+                    "-ar", "44100", str(dst)], check=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="타입캐스트로 뉴과 나레이션 전체를 한 파일로 생성")
     ap.add_argument("script", type=Path, help="녹음 원고 텍스트 파일")
@@ -189,6 +211,8 @@ def main() -> None:
     ap.add_argument("--max-chars", type=int, default=600,
                     help="한 번에 보낼 최대 글자 수 (API 한도 2000, 길면 서버가 502를 내기도 해서 기본 600)")
     ap.add_argument("--out", type=Path, help="저장할 WAV 경로")
+    ap.add_argument("--lufs", type=float, default=-16.0, help="음량 보정 목표 (기본 -16 LUFS, 유튜브 기준)")
+    ap.add_argument("--no-master", action="store_true", help="음량 보정을 하지 않음")
     ap.add_argument("--dry-run", action="store_true", help="API를 부르지 않고 나누기 결과만 보기")
     args = ap.parse_args()
 
@@ -203,8 +227,10 @@ def main() -> None:
 
     out = args.out or Path("outputs") / (args.script.stem + "-" + args.voice_name + ".wav")
     out.parent.mkdir(parents=True, exist_ok=True)
-    parts_dir = out.parent / (out.stem + "_parts")
-    parts_dir.mkdir(exist_ok=True)
+    # 설정이 바뀌면 다른 폴더를 쓰도록, 생성 설정을 폴더 이름에 넣는다
+    tag = f"{voice_id[-6:]}_{args.model}_{args.emotion}{args.intensity}_t{args.tempo}_p{args.pitch}"
+    parts_dir = out.parent / (out.stem + "_parts") / tag
+    parts_dir.mkdir(parents=True, exist_ok=True)
 
     parts = []
     for i, c in enumerate(chunks, 1):
@@ -219,11 +245,19 @@ def main() -> None:
     sec = join_wavs(parts, out, args.gap)
     print(f"완료: {out}  ({int(sec // 60)}분 {int(sec % 60)}초)")
 
-    if shutil.which("ffmpeg"):
-        mp3 = out.with_suffix(".mp3")
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(out),
-                        "-codec:a", "libmp3lame", "-b:a", "192k", str(mp3)], check=True)
-        print(f"MP3:  {mp3}")
+    if not shutil.which("ffmpeg"):
+        print("ffmpeg가 없어서 음량 보정과 MP3 변환은 건너뜁니다.")
+        return
+    src = out
+    if not args.no_master:
+        mastered = out.with_name(out.stem + "-master.wav")
+        master(out, mastered, args.lufs)
+        print(f"음량 보정: {mastered}  (목표 {args.lufs} LUFS)")
+        src = mastered
+    mp3 = src.with_suffix(".mp3")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src),
+                    "-codec:a", "libmp3lame", "-b:a", "192k", str(mp3)], check=True)
+    print(f"MP3:  {mp3}")
 
 
 if __name__ == "__main__":
