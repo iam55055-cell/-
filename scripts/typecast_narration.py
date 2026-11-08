@@ -65,7 +65,7 @@ def request(method: str, path: str, key: str, body: dict | None = None,
                 return resp.read()
         except urllib.error.HTTPError as e:
             detail = e.read().decode("utf-8", "replace")[:300]
-            if e.code == 429 and attempt < 3:
+            if e.code in (429, 500, 502, 503, 504) and attempt < 3:
                 time.sleep(2 ** (attempt + 1))
                 continue
             hints = {
@@ -171,7 +171,6 @@ def join_wavs(parts: list[bytes], out: Path, gap_sec: float) -> float:
             if i:
                 w.writeframes(silence)
             w.writeframes(f)
-        n = w.getnframes() if hasattr(w, "getnframes") else None
     with wave.open(str(out)) as r:
         return r.getnframes() / r.getframerate()
 
@@ -187,12 +186,14 @@ def main() -> None:
     ap.add_argument("--tempo", type=float, default=1.0, help="속도 0.5~2.0 (기본 1.0)")
     ap.add_argument("--pitch", type=int, default=0, help="음높이 -12~12")
     ap.add_argument("--gap", type=float, default=0.6, help="구간 사이 쉼(초)")
+    ap.add_argument("--max-chars", type=int, default=600,
+                    help="한 번에 보낼 최대 글자 수 (API 한도 2000, 길면 서버가 502를 내기도 해서 기본 600)")
     ap.add_argument("--out", type=Path, help="저장할 WAV 경로")
     ap.add_argument("--dry-run", action="store_true", help="API를 부르지 않고 나누기 결과만 보기")
     args = ap.parse_args()
 
     text = args.script.read_text(encoding="utf-8")
-    chunks = split_text(text)
+    chunks = split_text(text, min(args.max_chars, MAX_CHARS))
     print(f"원고 {len(text)}자 → {len(chunks)}개 구간: " + ", ".join(str(len(c)) for c in chunks))
     if args.dry_run:
         return
