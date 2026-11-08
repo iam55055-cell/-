@@ -21,6 +21,11 @@
 | `reference-1min.txt` | 위 레퍼런스의 대본 |
 | `reference-full-episode01.mp3` | 긴 호흡 레퍼런스. 1화 전체 나레이션 v2 (11분 41초) |
 
+## 구글 드라이브 사본
+
+「역사유튜브(뉴과) › 마스터보이스(민욱)」 폴더: https://drive.google.com/drive/folders/1heCo4oa6rjTtSnvRJJ_mbdGPUjibX3eX
+(안내 문서, preset.json, 1분 레퍼런스 대본. 음성 파일은 직접 올린다)
+
 ## 새 회차 만들기
 
 ```
