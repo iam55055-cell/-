@@ -4,9 +4,10 @@
 
 ### v2 (2026-11-08) — 현재 최종
 
-- 파일: `outputs/episode-01-recording-v2-민욱-master.mp3` (12분 22초)
+- 파일: `outputs/episode-01-recording-v2-민욱-master.mp3` (11분 41초)
 - 원고: `docs/episode-01-recording-v2.txt` (대화체. 내용·숫자는 v1 원고와 같고, “자,”, “네,”, “아,”, “음,” 같은 말 붙임 36곳을 넣었다)
-- 설정: 민욱(`tc_68f0727fd62a5934102f7ec0`), ssfm-v30, normal, **속도 0.85**
+- 설정: 민욱(`tc_68f0727fd62a5934102f7ec0`), ssfm-v30, normal, **속도 0.9** (0.85로 생성한 뒤 음높이를 그대로 두고 5.9% 빠르게: `--tempo 0.85 --stretch 1.0588`)
+- 속도 이력: 1.0은 빠르다 → 0.85는 살짝 늘어진다 → 0.9 확정. 타입캐스트에 `--tempo 0.9`를 직접 주면 실제로는 약 0.86이 나와서 0.85와 거의 같았다 (2026-11-08 측정)
 - 음량 보정: 문장 끝이 작아지거나 소리가 잠깐 줄어드는 부분을 압축으로 고르게 하고 −16 LUFS로 맞췄다
 
 | 측정 | 보정 전 | 보정 후 |
@@ -24,7 +25,7 @@
 ### 다시 만드는 법
 
 ```
-python scripts/typecast_narration.py docs/episode-01-recording-v2.txt --tempo 0.85
+python scripts/typecast_narration.py docs/episode-01-recording-v2.txt --tempo 0.85 --stretch 1.0588
 ```
 
 - API 키는 환경 변수 `TYPECAST_API_KEY`로 읽는다. 이 클라우드 환경에서는 저장된 네트워크 시크릿이 자동으로 붙으므로 `TYPECAST_API_KEY=proxy-injected`로 실행한다
@@ -33,7 +34,8 @@ python scripts/typecast_narration.py docs/episode-01-recording-v2.txt --tempo 0.
 
 | 옵션 | 기본값 | 설명 |
 |---|---|---|
-| `--tempo` | 1.0 | 속도. 뉴과 기준은 0.85 |
+| `--tempo` | 1.0 | 타입캐스트 생성 속도. 뉴과 기준은 0.85 |
+| `--stretch` | 1.0 | 생성 후 빠르기만 바꿈. 뉴과 기준은 1.0588 (= 최종 속도 0.9) |
 | `--emotion` | normal | normal, happy, sad, angry, whisper, toneup, tonedown |
 | `--intensity` | 1.0 | 감정 세기 0~2 |
 | `--gap` | 0.6 | 구간 사이 쉼(초) |

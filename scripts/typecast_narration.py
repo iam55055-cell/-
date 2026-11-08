@@ -182,14 +182,15 @@ def join_wavs(parts: list[bytes], out: Path, gap_sec: float) -> float:
 LEVELER = "highpass=f=70,acompressor=threshold=-30dB:ratio=3:attack=8:release=150:makeup=2"
 
 
-def master(src: Path, dst: Path, lufs: float) -> None:
+def master(src: Path, dst: Path, lufs: float, stretch: float = 1.0) -> None:
     target = f"I={lufs}:TP=-1.5:LRA=7"
+    chain = (f"atempo={stretch}," if stretch != 1.0 else "") + LEVELER
     probe = subprocess.run(
         ["ffmpeg", "-hide_banner", "-nostats", "-i", str(src), "-af",
-         f"{LEVELER},loudnorm={target}:print_format=json", "-f", "null", "-"],
+         f"{chain},loudnorm={target}:print_format=json", "-f", "null", "-"],
         capture_output=True, text=True, check=True).stderr
     m = json.loads(probe[probe.rindex("{"):probe.rindex("}") + 1])
-    second = (f"{LEVELER},loudnorm={target}:linear=true"
+    second = (f"{chain},loudnorm={target}:linear=true"
               f":measured_I={m['input_i']}:measured_TP={m['input_tp']}"
               f":measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}"
               f":offset={m['target_offset']}")
@@ -212,6 +213,9 @@ def main() -> None:
                     help="한 번에 보낼 최대 글자 수 (API 한도 2000, 길면 서버가 502를 내기도 해서 기본 600)")
     ap.add_argument("--out", type=Path, help="저장할 WAV 경로")
     ap.add_argument("--lufs", type=float, default=-16.0, help="음량 보정 목표 (기본 -16 LUFS, 유튜브 기준)")
+    ap.add_argument("--stretch", type=float, default=1.0,
+                    help="생성 후 음높이는 그대로 두고 빠르기만 바꿈 (예: 1.059 = 5.9%% 빠르게). "
+                         "타입캐스트 --tempo가 0.85와 0.9를 거의 구분하지 못해서 쓴다")
     ap.add_argument("--no-master", action="store_true", help="음량 보정을 하지 않음")
     ap.add_argument("--dry-run", action="store_true", help="API를 부르지 않고 나누기 결과만 보기")
     args = ap.parse_args()
@@ -251,7 +255,7 @@ def main() -> None:
     src = out
     if not args.no_master:
         mastered = out.with_name(out.stem + "-master.wav")
-        master(out, mastered, args.lufs)
+        master(out, mastered, args.lufs, args.stretch)
         print(f"음량 보정: {mastered}  (목표 {args.lufs} LUFS)")
         src = mastered
     mp3 = src.with_suffix(".mp3")
