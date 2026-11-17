@@ -1,0 +1,22 @@
+{
+  "name": "뉴과 마스터 보이스 (본인 목소리)",
+  "registered": "2026-11-17",
+  "status": "레퍼런스 녹음 저장 완료. AI Studios 보이스 클론 생성 대기",
+  "source": "진행자 본인 목소리. 휴대폰 녹음 1분 5초 (1분 레퍼런스 대본 낭독)",
+  "replaces": "library/voice/nyugwa-master (타입캐스트 · 민욱)는 예비 목소리로 유지",
+  "files": {
+    "original": "my-voice-original.mp3 (받은 그대로, 저장소에 올리지 않음)",
+    "reference": "my-voice-reference.wav / .mp3 (70Hz 이하 제거, 약한 잡음 제거, -16 LUFS. 저장소에 올리지 않음)",
+    "transcript": "my-voice-reference.txt (녹음 대본)"
+  },
+  "production": {
+    "tool": "AI Studios",
+    "voice": "AI Studios 음성 메뉴에서 my-voice-reference.wav로 만든 보이스 클론 (이름: 뉴과 본인 목소리)",
+    "avatar": "AI Studios 포토 아바타 (뉴스 스튜디오 의상 3종 중 선택)",
+    "motion_engine": "dvtalker (모션 없음, 추가 크레딧 0)",
+    "speed": "0.9 기준. AI Studios 음성 속도 설정에서 맞춘다",
+    "loudness": "내보낸 영상의 오디오를 -16 LUFS로 맞춘다",
+    "script_style": "대화체. 문단마다 '자,', '네,', '아,', '음,', '그런데요,' 한두 개"
+  },
+  "lip_sync": "AI Studios가 음성에 맞춰 입을 움직인다. 배경음악은 넣지 않고 내보낸 뒤 편집에서 깐다"
+}
