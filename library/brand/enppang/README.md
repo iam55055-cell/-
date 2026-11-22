@@ -1,10 +1,21 @@
-# 엔빵 로고와 채널 심볼 (시안 v0.2, 2026-11-22)
+# 엔빵 로고와 채널 심볼 (시안 v0.3, 2026-11-22)
 
-> 상태: **시안**. 채널 심볼은 A를 추천안으로 두고 B·C를 함께 만들었다. 같은 날 "N + 0" 변형 다섯 가지를 더 그렸다. 사용자가 고르면 확정한다.
+> 상태: **시안**. 지금 기준은 **"N빵" 로고**다 (심볼이 N 자리에 서고 옆에 '빵'이 붙는다). 심볼은 A를 대표안으로 두었고, 사용자가 고르면 확정한다.
 > 시안을 한눈에 보는 화면: https://claude.ai/artifact/CNBHmkV52AYoSEuMdtXtwq (비공개. 만든 사람만 열 수 있다)
-> 한 장짜리 미리보기: `png/preview.png` (워드마크와 심볼 A·B·C), `png/preview-n0.png` (N + 0 변형)
+> 한 장짜리 미리보기: `png/preview-nppang.png` ("N빵" 로고), `png/preview-n0.png` (N + 0 변형), `png/preview.png` (이전 시안: "엔빵" 워드마크와 심볼 A·B·C)
 
-## 생각
+## 지금 기준: "N빵" 로고 (2026-11-22)
+
+사용자가 로고를 "N빵"으로 만들고 N은 심볼로 하라고 했다. 그래서 심볼이 N 자리에 서고 그 옆에 '빵' 글자가 붙는 꼴로 다시 짰다. 먼저 만든 "엔빵" 워드마크(ㅇ 자리에 동전)는 이전 시안으로 남겨 둔다.
+
+- **대표안의 심볼은 A(N으로 쪼개진 동전)다.** 이 꼴에서는 심볼이 N 한 글자로 읽혀야 하는데, 여섯 후보 가운데 A의 N이 가장 크고 또렷하다. 심볼만 떼어 내면 그대로 채널 프로필 사진(`png/channel-icon-800.png`)이 된다
+- **사용자가 심볼을 고른 것은 아니다.** 후보 여섯 가지(A, N + 0 변형 1 ~ 5)를 같은 방식으로 '빵' 옆에 놓은 그림을 `svg/nppang/candidates/`에 두었다. 대표안을 바꾸려면 `scripts/enppang_logo_nppang.py`의 `PRIMARY`만 바꿔서 다시 돌린다
+- 후보별로 본 것: 1번은 "0빵"이나 "ㅁ빵"으로도 읽힌다. 2번은 고리가 크고 N이 작다. 3번은 "N°빵"처럼 읽힌다. 4번은 N이 가장 글자답지만 어두운 바탕에서는 색이 뒤집혀 복잡하다. 5번은 대각선이 동전 밖으로 나와 움직임이 있고, 그만큼 복잡하다
+- 둥근 심볼은 '빵'보다 위아래로 조금 크게 놓았다. 같은 키로 보이게 하려는 것이다
+- **채널 이름 표기는 바꾸지 않았다.** 문서와 제목은 "엔빵" 그대로다. 채널 이름까지 "N빵"으로 바꿀지는 사용자가 정한다
+- **상표를 다시 봐야 한다.** 로고가 글자 그대로 "N빵"이 되면 등록된 표기와 같아진다 (아래 '확인하지 못한 것')
+
+## 생각 (이전 시안: "엔빵" 워드마크)
 
 - **'엔'의 ㅇ 자리에 N으로 쪼개진 동전을 넣었다.** 내 돈 한 닢을 여럿이 나눠 갖는다는 뜻이고, 엔빵의 엔(N)이기도 하다
 - **그 동전을 떼어 낸 것이 채널 심볼이다.** 워드마크와 심볼이 한 벌이 된다
@@ -27,7 +38,13 @@
 
 | 파일 | 내용 |
 |---|---|
-| `svg/wordmark.svg` | 워드마크. 밝은 바탕용. 배경 투명 |
+| `svg/nppang/nppang.svg` | **"N빵" 로고 대표안.** 밝은 바탕용. 배경 투명 |
+| `svg/nppang/nppang-on-dark.svg`, `nppang-on-gold.svg` | "N빵" 로고. 어두운 바탕용, 금색 바탕용 |
+| `svg/nppang/lockup-nppang.svg`, `lockup-nppang-on-dark.svg` | 한 줄 설명을 붙인 "N빵" 로고 |
+| `svg/nppang/candidates/` | 심볼 후보 여섯 가지를 각각 '빵' 옆에 놓은 로고 (밝은 바탕, 어두운 바탕) |
+| `png/nppang/` | "N빵" 대표안의 PNG. 폭 2400px, 배경 투명 |
+| `png/preview-nppang.png` | "N빵" 로고 미리보기 |
+| `svg/wordmark.svg` | 이전 시안인 "엔빵" 워드마크. 밝은 바탕용. 배경 투명 |
 | `svg/wordmark-on-dark.svg` | 워드마크. 어두운 바탕용 (글자가 종이색, 동전의 N 자리는 비어 있음). 배경 투명 |
 | `svg/wordmark-on-gold.svg` | 워드마크. 금색 바탕용 (동전이 종이색) |
 | `svg/lockup.svg`, `svg/lockup-on-dark.svg` | 한 줄 설명을 붙인 로고 |
@@ -74,8 +91,9 @@
 
 ## 쓰는 법
 
-- 밝은 바탕에는 `wordmark.svg`, 어두운 바탕에는 `wordmark-on-dark.svg`, 금색 바탕에는 `wordmark-on-gold.svg`를 쓴다. 금색 바탕에 기본 워드마크를 올리면 동전이 묻힌다
-- 처음 보는 사람에게 닿는 자리(채널 배너, 영상 첫 화면)에는 한 줄 설명을 붙인 로고를 쓴다
+- 밝은 바탕에는 `nppang/nppang.svg`, 어두운 바탕에는 `nppang/nppang-on-dark.svg`, 금색 바탕에는 `nppang/nppang-on-gold.svg`를 쓴다. 금색 바탕에 기본 로고를 올리면 동전이 묻힌다
+- 처음 보는 사람에게 닿는 자리(채널 배너, 영상 첫 화면)에는 한 줄 설명을 붙인 로고(`nppang/lockup-nppang.svg`)를 쓴다
+- 이전 시안인 "엔빵" 워드마크도 같은 식으로 나뉘어 있다 (`wordmark.svg`, `wordmark-on-dark.svg`, `wordmark-on-gold.svg`, `lockup.svg`)
 - 글자의 비율과 동전 안의 N은 바꾸지 않는다. 늘이거나 기울이지 않는다
 
 ## 유튜브 프로필 사진 올리기
@@ -90,16 +108,18 @@
 ```
 python3 scripts/enppang_logo.py library/brand/enppang/svg <NotoSansKR-Bold.ttf 경로>
 python3 scripts/enppang_logo_n0.py library/brand/enppang/svg/n0
+python3 scripts/enppang_logo_nppang.py library/brand/enppang/svg/nppang <NotoSansKR-Bold.ttf 경로>
 node scripts/enppang_logo_png.js library/brand/enppang
 ```
 
 - 글자와 심볼의 모양, 색, 비율은 `scripts/enppang_logo.py`의 숫자로 정해져 있다
 - N + 0 변형은 `scripts/enppang_logo_n0.py`가 그린다. 워드마크에 넣어 보는 그림은 `enppang_logo.py`의 글자 모양을 불러다 쓴다
+- "N빵" 로고는 `scripts/enppang_logo_nppang.py`가 그린다. '빵' 글자는 `enppang_logo.py`에서, 심볼 그림은 위 두 파일에서 불러다 쓴다
 - 한 줄 설명의 글꼴은 Noto Sans KR Bold다 (SIL Open Font License). 글꼴 파일은 저장소에 넣지 않았다. 윤곽선으로 바꿔 넣었으므로 SVG를 여는 데는 글꼴이 필요 없다
 - PNG 내보내기에는 Playwright(Chromium)가 필요하다
 
 ## 확인하지 못한 것
 
 - **비슷한 로고가 이미 있는지 찾아보지 않았다.** 원 안의 N은 흔한 모양이다. 변형 2번은 그 구도 그대로라서, 고르기 전에 비슷한 로고와 상표부터 찾아봐야 한다
-- **상표.** 기획서에 따르면 "N빵"은 36류·38류에 케이뱅크 등록이 있고, 41류 등록 여부와 변리사 확인이 남아 있다. 심볼에 알파벳 N을 썼으니 그때 로고도 함께 보여 준다
+- **상표.** 기획서의 키프리스 조사(2026-11-20, 국내 10건 가운데 6건 확인)에 따르면 "N빵"은 38류(통신·방송)와 36류(금융)에 케이뱅크 이름으로 등록되어 있고, 나머지 4건과 41류는 확인하지 못했다. 기획서는 지정서비스가 모바일 지갑·금융 통신이라 채널과 겹칠 위험이 낮아 보인다고 적었다. 다만 로고가 글자 그대로 "N빵"이 되면 등록된 표기와 같아지므로, 이 로고로 정하기 전에 변리사에게 로고를 함께 보여 주고 확인받는 편이 좋다 (기획서도 변리사 확인을 권했다)
 - 채널 배너와 영상 워터마크는 아직 만들지 않았다

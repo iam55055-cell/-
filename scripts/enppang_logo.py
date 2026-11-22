@@ -8,7 +8,8 @@
   태그라인이 붙은 로고(lockup)는 만들지 않는다. 2026-11-22 시안은 Noto Sans KR Bold
   (SIL Open Font License)로 만들었다. fonttools가 필요하다 (pip install fonttools).
 - PNG는 scripts/enppang_logo_png.js로 내보낸다.
-- 'N + 0' 변형 심볼은 scripts/enppang_logo_n0.py가 이 파일의 글자 도형을 가져다 쓴다.
+- 'N + 0' 변형 심볼은 scripts/enppang_logo_n0.py가, 'N빵' 꼴 로고는 scripts/enppang_logo_nppang.py가
+  이 파일의 글자 도형을 가져다 쓴다.
 """
 import math, os, sys
 
@@ -67,8 +68,16 @@ def letters(ink=INK, coin=GOLD, cut=INK, pieces=False, o_glyph=None):
     s.append(rect(ox + 79, 7, 14, 71, ink))           # ㅣ
     s.append(rect(ox + 22, 70, 14, 28, ink))          # ㄴ 세로
     s.append(rect(ox + 22, 84, 71, 14, ink))          # ㄴ 가로
-    # ---- 빵
-    ox = 100.5
+    s.append(ppang(100.5, ink))
+    return ''.join(s)
+
+
+PPANG_BOX = (6.0, 7.0, 93.0, 98.0)   # '빵'의 획이 놓이는 범위: 칸 안에서 왼쪽, 위, 오른쪽, 아래
+
+
+def ppang(ox, ink=INK):
+    """'빵' 한 글자. ox는 100×100 칸의 왼쪽 끝이다."""
+    s = []
     for bx in (6, 36):                                # ㅂ 두 개
         s.append(rect(ox + bx, 12, 9.5, 44, ink))
         s.append(rect(ox + bx + 16.5, 12, 9.5, 44, ink))

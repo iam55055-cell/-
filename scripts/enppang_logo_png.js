@@ -29,6 +29,14 @@ const jobs = [
       jobs.push([path.join('n0', f), path.join('n0', f.replace('.svg', isWordmark ? '-1600.png' : '-800.png')), isWordmark ? 1600 : 800, isWordmark]);
     }
   }
+  // svg/nppang/ 바로 아래의 'N빵' 대표안은 폭 2400px, 투명 배경으로 내보낸다 (candidates/ 는 내보내지 않는다)
+  const np = path.join(root, 'svg', 'nppang');
+  if (fs.existsSync(np)) {
+    fs.mkdirSync(path.join(root, 'png', 'nppang'), { recursive: true });
+    for (const f of fs.readdirSync(np).filter((x) => x.endsWith('.svg')).sort()) {
+      jobs.push([path.join('nppang', f), path.join('nppang', f.replace('.svg', '-2400.png')), 2400, true]);
+    }
+  }
   const browser = await chromium.launch();
   for (const [svg, png, width, transparent] of jobs) {
     const src = path.join(root, 'svg', svg);

@@ -6,14 +6,14 @@ N(엔)과 0(빵)을 한 그림으로 합치는 다섯 가지 방법이다. 모�
 사용법:
     python3 scripts/enppang_logo_n0.py library/brand/enppang/svg/n0
     node scripts/enppang_logo_png.js library/brand/enppang     # PNG 내보내기
+
+각 변형의 숫자는 V1 ~ V5에 모아 두었다. BOX는 그림이 차지하는 범위이고,
+scripts/enppang_logo_nppang.py가 심볼을 글자 크기에 맞출 때 쓴다.
 """
 import math, os, sys
 
-INK = '#17130E'
-GOLD = '#FFC62B'
-PAPER = '#FFF7E3'
-OUT = sys.argv[1] if len(sys.argv) > 1 else 'out-n0'
-os.makedirs(OUT, exist_ok=True)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from enppang_logo import INK, GOLD, PAPER, O_SLOT, letters, wordmark_viewbox, svg as wordmark_svg  # noqa: E402
 
 C = 400  # 800×800 판의 가운데
 
@@ -75,14 +75,13 @@ def band_in_circle(e1, e2, R):
             f'L{b1[0]:.2f},{b1[1]:.2f} {arc(b1, a1, R)} Z')
 
 
-def save(name, text):
-    open(os.path.join(OUT, name), 'w', encoding='utf-8').write(text)
-
-
 # ------------------------------------------------------------------ 1. 빗금 친 0
+V1 = (390, 520, 70, 122)                  # 폭, 높이, 고리 굵기, 바깥 모서리 반지름
+
+
 def v1(bg, main, sub):
     """0의 양옆이 N의 세로획이 되고, 빗금이 N의 대각선이 된다."""
-    w, h, t, r = 390, 520, 70, 122
+    w, h, t, r = V1
     ring = rrect(w, h, r) + ' ' + rrect(w - 2 * t, h - 2 * t, r - t)
     xi, yi = w / 2 - t, h / 2 - t          # 안쪽 사각형의 반폭, 반높이
     c = r - t                               # 안쪽 모서리의 둥근 반지름. 빗금이 딱 여기서 벽과 만난다
@@ -93,34 +92,54 @@ def v1(bg, main, sub):
 
 
 # ------------------------------------------------------------------ 2. 0 속의 N
+V2_RING = (232, 292, 64)                  # 0의 가로 반지름, 세로 반지름, 굵기
+V2_N = (176, 270, 58)                     # N의 폭, 높이, 획 굵기
+
+
 def v2(bg, main, sub):
     """세로로 긴 0 안에 N이 떠 있다."""
-    rx, ry, t = 232, 292, 64
+    rx, ry, t = V2_RING
     ring = ellipse(rx, ry) + ' ' + ellipse(rx - t, ry - t)
-    left, right, diag = n_parts(176, 270, 58)
+    left, right, diag = n_parts(*V2_N)
     n = ' '.join(poly(p) for p in (left, right, diag))
     return f'<path fill="{main}" fill-rule="evenodd" d="{ring}"/><path fill="{sub}" d="{n}"/>'
 
 
 # ------------------------------------------------------------------ 3. N 어깨 위의 0
+V3_N = (350, 430, 102)                    # N의 폭, 높이, 획 굵기
+V3_SHIFT = (-22, 28)                      # N을 왼쪽 아래로 살짝 옮긴다
+V3_RING = (164, -184, 96, 38, 24)         # 0의 가운데 x, y, 바깥 반지름, 굵기, N과 띄우는 틈
+
+
 def v3(bg, main, sub):
     """굵은 N의 오른쪽 어깨에 작은 0(동전)이 붙어 있다. 지수처럼 읽힌다."""
-    w, h, t = 350, 430, 102
-    ox, oy = -22, 28                         # N을 왼쪽 아래로 살짝 옮긴다
+    w, h, t = V3_N
+    ox, oy = V3_SHIFT
+    cx, cy, R, tr, gap = V3_RING
     left, right, diag = n_parts(w, h, t)
-    n = ' '.join(poly([(px + ox, py + oy) for px, py in part]) for part in (left, right, diag))
-    cx, cy, R, tr, halo = 164, -184, 96, 38, 24   # 테두리 여백이 세로획의 모서리까지 덮는 자리
+    moved = lambda part: [(px + ox, py + oy) for px, py in part]
+    # 오른쪽 세로획의 윗부분은 0 둘레의 틈만큼 둥글게 파낸다. 바탕색 원으로 덮지 않으므로
+    # 배경이 투명해도 그대로 쓸 수 있다
+    rc = R + gap
+    xl, xr, bottom = w / 2 - t + ox, w / 2 + ox, h / 2 + oy
+    yl = cy + math.sqrt(rc * rc - (xl - cx) ** 2)
+    yr = cy + math.sqrt(rc * rc - (xr - cx) ** 2)
+    stem = f'M{xl:.2f},{yl:.2f} A{rc:.2f},{rc:.2f} 0 0 0 {xr:.2f},{yr:.2f} V{bottom:.2f} H{xl:.2f} Z'
+    n = f'{poly(moved(left))} {poly(moved(diag))} {stem}'
     ring = ellipse(R, R) + ' ' + ellipse(R - tr, R - tr)
     return (f'<path fill="{sub}" d="{n}"/>'
-            f'<g transform="translate({cx} {cy})"><circle r="{R + halo}" fill="{bg}"/>'
-            f'<path fill="{main}" fill-rule="evenodd" d="{ring}"/></g>')
+            f'<g transform="translate({cx} {cy})"><path fill="{main}" fill-rule="evenodd" d="{ring}"/></g>')
 
 
 # ------------------------------------------------------------------ 4. 0을 뚫고 나온 N
+V4_R = 216                                # 동전 반지름
+V4_N = (300, 548, 88)                     # N의 폭, 높이, 획 굵기
+
+
 def v4(bg, main, sub):
     """동전(0)보다 큰 N이 동전을 뚫고 지나간다. 동전 안쪽에서는 N이 바탕색으로 뒤집힌다."""
-    R = 216
-    w, h, t = 300, 548, 88
+    R = V4_R
+    w, h, t = V4_N
     left, right, diag = n_parts(w, h, t)
     n = ' '.join(poly(p) for p in (left, right, diag))
     x = w / 2
@@ -135,24 +154,36 @@ def v4(bg, main, sub):
             f'<path fill="{bg}" d="{lin} {rin} {din}"/>')
 
 
+def v4_flat(main, sub):
+    """4번을 색 뒤집기 없이 그린다. 동전 위에 N을 통째로 얹는다. 밝은 바탕에서 쓴다."""
+    n = ' '.join(poly(p) for p in n_parts(*V4_N))
+    return f'<circle r="{V4_R}" fill="{main}"/><path fill="{sub}" d="{n}"/>'
+
+
 # ------------------------------------------------------------------ 5. N이 쪼갠 0
+V5 = (270, 0.24, 0.42, 46)                # 동전 반지름, 획 굵기와 세로획 위치(반지름 대비), 미끄러진 거리
+
+
+def _v5_geom():
+    R, stem, xoff, s_ = V5
+    hw = stem * R / 2
+    a_, b_ = xoff * R + hw, xoff * R - hw
+    ya, yb = math.sqrt(R * R - a_ * a_), math.sqrt(R * R - b_ * b_)
+    n_ = math.hypot(a_ + b_, 2 * yb)
+    ux, uy = (a_ + b_) / n_, 2 * yb / n_      # 대각선 방향 단위 벡터 (왼쪽 위 → 오른쪽 아래)
+    return R, hw, a_, b_, ya, yb, ux, uy, s_
+
+
 def v5(bg, main, sub, back=None):
     """N 모양으로 쪼개진 동전의 두 반쪽이 대각선을 따라 엇갈려 미끄러진다.
 
     back을 주면 두 반쪽 밑에 그 색을 깔아 N 자리를 채운다. 밝은 바탕에서 N이 보이게 할 때 쓴다.
     """
-    R, stem, xoff = 270, 0.24, 0.42
-    hw = stem * R / 2
-    a_, b_ = xoff * R + hw, xoff * R - hw
-    ya, yb = math.sqrt(R * R - a_ * a_), math.sqrt(R * R - b_ * b_)
+    R, hw, a_, b_, ya, yb, ux, uy, s_ = _v5_geom()
     m = 2 * yb / (a_ + b_)
     y_r = -yb + m * 2 * b_
     y_l = -yb + m * 2 * hw
     A = f'A{R:.2f},{R:.2f} 0 0'
-    # 대각선 방향 단위 벡터 (왼쪽 위 → 오른쪽 아래)
-    n_ = math.hypot(a_ + b_, 2 * yb)
-    ux, uy = (a_ + b_) / n_, 2 * yb / n_
-    s_ = 46                                   # 미끄러진 거리
     lower = (ux * s_, uy * s_)                # 왼쪽 반쪽은 오른쪽 아래로
     upper = (-ux * s_, -uy * s_)              # 오른쪽 반쪽은 왼쪽 위로
     pieces = [
@@ -181,31 +212,59 @@ VARIANTS = [
     ('4-n-through-zero', '0을 뚫고 나온 N', v4),
     ('5-split-zero', 'N이 쪼갠 0', v5),
 ]
+DRAW = {key[0]: fn for key, _, fn in VARIANTS}
 
-for key, name, fn in VARIANTS:
-    save(f'n0-{key}.svg', svg(fn(INK, GOLD, PAPER), INK, f'엔빵 심볼 변형: {name}'))
-    save(f'n0-{key}-on-gold.svg', svg(fn(GOLD, INK, PAPER), GOLD, f'엔빵 심볼 변형: {name} (금색 바탕)'))
 
-# ------------------------------------------------------------------ 워드마크의 ㅇ 자리에 넣어 보기
-# 둥근 모양인 2번과 5번만 '엔'의 ㅇ 자리에 들어간다. 1번은 ㅁ으로 읽히고, 3·4번은 ㅇ 모양이 아니다.
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from enppang_logo import letters, wordmark_viewbox, svg as wordmark_svg, O_SLOT  # noqa: E402
+def _boxes():
+    """변형마다 그림이 차지하는 범위 (왼쪽, 위, 오른쪽, 아래). 원점은 판의 가운데다."""
+    w3, h3, _ = V3_N
+    ox, oy = V3_SHIFT
+    cx, cy, r3 = V3_RING[:3]
+    half4 = max(V4_R, V4_N[0] / 2)
+    R, _, _, _, _, _, ux, uy, s_ = _v5_geom()
+    return {
+        '1': (-V1[0] / 2, -V1[1] / 2, V1[0] / 2, V1[1] / 2),
+        '2': (-V2_RING[0], -V2_RING[1], V2_RING[0], V2_RING[1]),
+        '3': (ox - w3 / 2, min(oy - h3 / 2, cy - r3), max(ox + w3 / 2, cx + r3), oy + h3 / 2),
+        '4': (-half4, -V4_N[1] / 2, half4, V4_N[1] / 2),
+        '5': (-(R - ux * s_), -(R + uy * s_), R - ux * s_, R + uy * s_),
+    }
+
+
+BOX = _boxes()
 
 
 def in_slot(fragment, scale):
+    """'엔'의 ㅇ 자리에 그림을 놓는다."""
     cx, cy, _ = O_SLOT
     return f'<g transform="translate({cx} {cy}) scale({scale:.5f})">{fragment}</g>'
 
 
-vb = wordmark_viewbox()
-hgt = round(1200 * vb[3] / vb[2])
-TRIALS = (
-    # (번호, ㅇ 자리에 맞추는 배율, 밝은 바탕용 그림, 어두운 바탕용 그림)
-    ('2', 50 / 584, v2(PAPER, GOLD, INK), v2(INK, GOLD, PAPER)),
-    ('5', 25 / 316, v5(PAPER, GOLD, INK, back=INK), v5(INK, GOLD, PAPER)),
-)
-for key, scale, light, dark in TRIALS:
-    save(f'wordmark-with-{key}.svg', wordmark_svg(1200, hgt, letters(o_glyph=in_slot(light, scale)), vb))
-    save(f'wordmark-with-{key}-on-dark.svg',
-         wordmark_svg(1200, hgt, letters(ink=PAPER, o_glyph=in_slot(dark, scale)), vb))
-print('written to', OUT)
+def main(out):
+    os.makedirs(out, exist_ok=True)
+
+    def save(name, text):
+        open(os.path.join(out, name), 'w', encoding='utf-8').write(text)
+
+    for key, name, fn in VARIANTS:
+        save(f'n0-{key}.svg', svg(fn(INK, GOLD, PAPER), INK, f'엔빵 심볼 변형: {name}'))
+        save(f'n0-{key}-on-gold.svg', svg(fn(GOLD, INK, PAPER), GOLD, f'엔빵 심볼 변형: {name} (금색 바탕)'))
+
+    # ---------- 워드마크의 ㅇ 자리에 넣어 보기
+    # 둥근 모양인 2번과 5번만 '엔'의 ㅇ 자리에 들어간다. 1번은 ㅁ으로 읽히고, 3·4번은 ㅇ 모양이 아니다.
+    vb = wordmark_viewbox()
+    hgt = round(1200 * vb[3] / vb[2])
+    trials = (
+        # (번호, ㅇ 자리에 맞추는 배율, 밝은 바탕용 그림, 어두운 바탕용 그림)
+        ('2', 50 / 584, v2(PAPER, GOLD, INK), v2(INK, GOLD, PAPER)),
+        ('5', 25 / 316, v5(PAPER, GOLD, INK, back=INK), v5(INK, GOLD, PAPER)),
+    )
+    for key, scale, light, dark in trials:
+        save(f'wordmark-with-{key}.svg', wordmark_svg(1200, hgt, letters(o_glyph=in_slot(light, scale)), vb))
+        save(f'wordmark-with-{key}-on-dark.svg',
+             wordmark_svg(1200, hgt, letters(ink=PAPER, o_glyph=in_slot(dark, scale)), vb))
+    print('written to', out)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1] if len(sys.argv) > 1 else 'out-n0')

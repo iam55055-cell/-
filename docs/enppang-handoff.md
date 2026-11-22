@@ -65,4 +65,4 @@
 | `docs/enppang-s1-lineup.md` | 시즌 1 제목과 10편 제목 |
 | `docs/enppang-s1e1-script.md` | 1화 대본 |
 | `library/voice/enppang-master-myvoice/` | 본인 목소리 레퍼런스의 대본과 설정. 음성 파일은 올리지 않는다 |
-| `library/brand/enppang/` | 로고와 채널 심볼 시안 (SVG, PNG). 심볼은 A·B·C 가운데 아직 고르지 않았다 |
+| `library/brand/enppang/` | 로고와 채널 심볼 시안 (SVG, PNG). 지금 기준은 "N빵" 로고다 (N은 심볼, 사용자 지시). 심볼은 A를 대표안으로 두었고 사용자가 고르지는 않았다 |
