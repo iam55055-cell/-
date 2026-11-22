@@ -1,7 +1,7 @@
 {
   "name": "엔빵 마스터 보이스 (본인 목소리)",
   "registered": "2026-11-22",
-  "status": "기준 대본 작성 완료. 레퍼런스 녹음 대기",
+  "status": "레퍼런스 녹음 완료 (2026-11-22). 정리본 제작과 속도 측정 완료. 회차 제작 방식은 미정",
   "source": "진행자 본인 목소리. 엔빵 기준 대본(my-voice-reference.txt) 낭독",
   "decided": {
     "voice": "본인 목소리 (2026-11-22 확정)",
@@ -10,15 +10,43 @@
     "assertion": "단정 표현은 자유롭게 쓴다"
   },
   "files": {
-    "transcript": "my-voice-reference.txt (녹음 대본, 공백 제외 361자)",
-    "original": "my-voice-original.* (받은 그대로, 저장소에 올리지 않음)",
-    "reference": "my-voice-reference.wav / .mp3 (정리본, 저장소에 올리지 않음)"
+    "transcript": "my-voice-reference.txt (녹음 대본, 공백 제외 361자, 21문장)",
+    "original": "my-voice-original.m4a (받은 그대로. AAC 48kHz 모노, 74.7초. 저장소에 올리지 않음)",
+    "reference": "my-voice-reference.wav / .mp3 (정리본, 72.5초. 저장소에 올리지 않음)"
   },
   "production": {
     "method": "미정. 회차마다 직접 녹음하거나, 이 레퍼런스로 목소리 클론을 등록해 만든다",
-    "speed": "미정. 레퍼런스 녹음에서 분당 글자 수를 재서 채운다. 그 전까지 계산 기준은 공백 제외 분당 350자",
-    "cleanup": "70Hz 이하 제거, 약한 잡음 제거 (뉴과 본인 목소리 레퍼런스와 같은 처리)",
+    "speed": "공백 제외 분당 약 301자 (본인 목소리 실측). 대본 길이 계산에 쓴다",
+    "cleanup": "앞뒤 자르기(0.85~73.30초) → highpass 70Hz → afftdn nr=6 → acompressor -24dB 2:1 (attack 5, release 100) → +14.7dB → alimiter -2dB (attack 2, release 30). 192kHz에서 처리한 뒤 48kHz로 내보냄",
     "loudness": "-16 LUFS"
   },
-  "guide": "docs/enppang-narrator-master.md"
+  "guide": "docs/enppang-narrator-master.md",
+  "measured": {
+    "date": "2026-11-22",
+    "speech_seconds": 72.0,
+    "chars_per_minute_no_spaces": 301,
+    "spoken_syllables": 340,
+    "syllables_per_second": 4.72,
+    "articulation_syllables_per_second": 6.68,
+    "pauses": {
+      "count": 41,
+      "total_seconds": 21.1,
+      "share": 0.29,
+      "sentence_end_mean_seconds": 0.58,
+      "inside_sentence_mean_seconds": 0.45,
+      "longest_seconds": 1.37
+    },
+    "original": {
+      "loudness_lufs": -26.7,
+      "peak_dbfs": -2.5,
+      "noise_floor_db": -70,
+      "clipping": false
+    },
+    "reference": {
+      "loudness_lufs": -16.0,
+      "true_peak_dbtp": -1.9,
+      "noise_floor_db": -67
+    },
+    "not_checked": "소리를 들어 볼 수 없어 발음·억양·오독은 확인하지 못했다. 쉼 구조가 대본 21문장과 맞는 것만 확인했다 (상관계수 0.99)"
+  }
 }
