@@ -8,15 +8,18 @@
   태그라인이 붙은 로고(lockup)는 만들지 않는다. 2026-11-22 시안은 Noto Sans KR Bold
   (SIL Open Font License)로 만들었다. fonttools가 필요하다 (pip install fonttools).
 - PNG는 scripts/enppang_logo_png.js로 내보낸다.
+- 'N + 0' 변형 심볼은 scripts/enppang_logo_n0.py가 이 파일의 글자 도형을 가져다 쓴다.
 """
 import math, os, sys
 
 INK = '#17130E'      # 잉크 (글자, 어두운 바탕)
 GOLD = '#FFC62B'     # 동전
 PAPER = '#FFF7E3'    # 영수증 종이 (밝은 바탕)
-OUT = sys.argv[1] if len(sys.argv) > 1 else 'out'
-FONT = sys.argv[2] if len(sys.argv) > 2 else None
-os.makedirs(OUT, exist_ok=True)
+
+LW = 193.0           # 글자 전체 폭 (왼쪽 5.5 ~ 오른쪽 198.5 사이)
+X0, PAD = 5.5, 12.0
+O_SLOT = (29.5, 40.0, 24.0)   # '엔'의 ㅇ 자리: 가운데 x, y, 반지름
+
 
 def rect(x, y, w, h, fill, r=1.6):
     return f'<rect x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" rx="{r}" fill="{fill}"/>'
@@ -49,15 +52,16 @@ def ncoin(cx, cy, R, coin=GOLD, cut=INK, stem=0.27, xoff=0.43, pieces=False):
     return g + f'<circle r="{R:.2f}" fill="{coin}"/><path fill="{cut}" d="{left} {right} {diag}"/></g>'
 
 
-LW = 193.0  # 글자 전체 폭 (왼쪽 5.5 ~ 오른쪽 198.5 사이)
+def letters(ink=INK, coin=GOLD, cut=INK, pieces=False, o_glyph=None):
+    """'엔빵' 글자. 음절 하나가 100×100 칸이고 두 음절을 붙여 그린다.
 
-
-def letters(ink=INK, coin=GOLD, cut=INK, pieces=False):
-    """'엔빵' 글자. 음절 하나가 100×100 칸이고 두 음절을 붙여 그린다."""
+    o_glyph: '엔'의 ㅇ 자리에 넣을 SVG 조각. 주지 않으면 N 동전을 넣는다.
+    """
     s = []
     # ---- 엔: 초성 ㅇ 자리에 N 동전
     ox = 0
-    s.append(ncoin(ox + 29.5, 40, 24, coin, cut, pieces=pieces))
+    cx, cy, R = O_SLOT
+    s.append(o_glyph if o_glyph is not None else ncoin(ox + cx, cy, R, coin, cut, pieces=pieces))
     s.append(rect(ox + 55, 33.75, 7, 12.5, ink))       # ㅓ의 가로 삐침
     s.append(rect(ox + 60, 10, 14, 64, ink))          # ㅓ 세로획
     s.append(rect(ox + 79, 7, 14, 71, ink))           # ㅣ
@@ -79,6 +83,10 @@ def letters(ink=INK, coin=GOLD, cut=INK, pieces=False):
     return ''.join(s)
 
 
+def wordmark_viewbox():
+    return (X0 - PAD, 7 - PAD, LW + 2 * PAD, 91 + 2 * PAD)
+
+
 def svg(w, h, body, vb, bg=None, label='엔빵'):
     x, y, vw, vh = vb
     back = f'<rect x="{x}" y="{y}" width="{vw}" height="{vh}" fill="{bg}"/>' if bg else ''
@@ -86,17 +94,12 @@ def svg(w, h, body, vb, bg=None, label='엔빵'):
             f'role="img" aria-label="{label}">{back}{body}</svg>\n')
 
 
-def save(name, text):
-    open(os.path.join(OUT, name), 'w', encoding='utf-8').write(text)
-
-
-# ---------- 태그라인 (글꼴 윤곽선)
-def tagline(text, width, fill, tracking=0.06):
-    """text를 윤곽선으로 그려 폭 width에 맞춘다. 반환: (svg 조각, 높이)."""
+def tagline(text, width, fill, font, tracking=0.06):
+    """text를 글꼴 윤곽선으로 그려 폭 width에 맞춘다. 반환: (svg 조각, 글자 높이)."""
     from fontTools.ttLib import TTFont
     from fontTools.pens.svgPathPen import SVGPathPen
     from fontTools.pens.transformPen import TransformPen
-    f = TTFont(FONT)
+    f = TTFont(font)
     gs = f.getGlyphSet()
     cmap = f.getBestCmap()
     upm = f['head'].unitsPerEm
@@ -117,30 +120,6 @@ def tagline(text, width, fill, tracking=0.06):
     return f'<g transform="scale({sc:.5f})"><path d="{d}" fill="{fill}"/></g>', cap
 
 
-X0, PAD = 5.5, 12.0
-# ---------- 워드마크
-vb = (X0 - PAD, 7 - PAD, LW + 2 * PAD, 91 + 2 * PAD)
-ratio = vb[3] / vb[2]
-save('wordmark.svg', svg(1200, round(1200 * ratio), letters(), vb))
-save('wordmark-on-dark.svg', svg(1200, round(1200 * ratio), letters(ink=PAPER, pieces=True), vb))
-# 금색 바탕에서는 동전이 묻히므로 동전을 종이색으로 바꾼다
-save('wordmark-on-gold.svg', svg(1200, round(1200 * ratio), letters(coin=PAPER), vb))
-
-# ---------- 태그라인 붙인 로고
-if FONT:
-    for name, ink in (('lockup.svg', INK), ('lockup-on-dark.svg', PAPER)):
-        tg, cap = tagline('내 돈 나눠 먹는 사람들', LW, ink)
-        gapy = 13
-        body = letters(ink=ink, pieces=(ink == PAPER)) + f'<g transform="translate({X0} {98 + gapy + cap:.2f})">{tg}</g>'
-        vb2 = (X0 - PAD, 7 - PAD, LW + 2 * PAD, 91 + gapy + cap + 4 + 2 * PAD)
-        save(name, svg(1200, round(1200 * vb2[3] / vb2[2]), body, vb2, label='엔빵 | 내 돈 나눠 먹는 사람들'))
-
-# ---------- 심볼 A: N으로 쪼개진 동전
-save('symbol.svg', svg(800, 800, ncoin(400, 400, 328, pieces=True), (0, 0, 800, 800), bg=INK, label='엔빵 심볼'))
-save('symbol-coin-only.svg', svg(800, 800, ncoin(400, 400, 390), (0, 0, 800, 800), label='엔빵 심볼'))
-
-
-# ---------- 심볼 B: 영수증 위의 N
 def receipt(cx, cy, w, h, teeth=6, fill=PAPER, r=20):
     x0, y0 = cx - w / 2, cy - h / 2
     tw = w / teeth
@@ -159,17 +138,50 @@ def nglyph(cx, cy, w, h, t, fill=INK):
             f'<polygon points="{x0:.1f},{y0:.1f} {x0 + t:.1f},{y0:.1f} {x0 + w:.1f},{y0 + h:.1f} {x0 + w - t:.1f},{y0 + h:.1f}"/></g>')
 
 
-b = receipt(400, 408, 350, 480)
-b += nglyph(400, 322, 214, 214, 56)
-b += f'<rect x="293" y="478" width="214" height="28" rx="4" fill="{INK}"/>'
-b += f'<rect x="293" y="530" width="132" height="28" rx="4" fill="{INK}"/>'
-save('symbol-alt-receipt.svg', svg(800, 800, b, (0, 0, 800, 800), bg=GOLD, label='엔빵 심볼 (영수증)'))
+def main(out, font=None):
+    os.makedirs(out, exist_ok=True)
 
-# ---------- 심볼 C: 글자 심볼
-sc = 2.6
-body_c = letters(ink=INK, coin=PAPER, cut=INK)
-tx = 400 - (X0 + LW / 2) * sc
-ty = 400 - 52.5 * sc
-save('symbol-alt-letters.svg', svg(800, 800, f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc})">{body_c}</g>',
-                                   (0, 0, 800, 800), bg=GOLD, label='엔빵 심볼 (글자)'))
-print('written to', OUT)
+    def save(name, text):
+        open(os.path.join(out, name), 'w', encoding='utf-8').write(text)
+
+    # ---------- 워드마크
+    vb = wordmark_viewbox()
+    ratio = vb[3] / vb[2]
+    save('wordmark.svg', svg(1200, round(1200 * ratio), letters(), vb))
+    save('wordmark-on-dark.svg', svg(1200, round(1200 * ratio), letters(ink=PAPER, pieces=True), vb))
+    # 금색 바탕에서는 동전이 묻히므로 동전을 종이색으로 바꾼다
+    save('wordmark-on-gold.svg', svg(1200, round(1200 * ratio), letters(coin=PAPER), vb))
+
+    # ---------- 태그라인 붙인 로고
+    if font:
+        for name, ink in (('lockup.svg', INK), ('lockup-on-dark.svg', PAPER)):
+            tg, cap = tagline('내 돈 나눠 먹는 사람들', LW, ink, font)
+            gapy = 13
+            body = (letters(ink=ink, pieces=(ink == PAPER))
+                    + f'<g transform="translate({X0} {98 + gapy + cap:.2f})">{tg}</g>')
+            vb2 = (X0 - PAD, 7 - PAD, LW + 2 * PAD, 91 + gapy + cap + 4 + 2 * PAD)
+            save(name, svg(1200, round(1200 * vb2[3] / vb2[2]), body, vb2, label='엔빵 | 내 돈 나눠 먹는 사람들'))
+
+    # ---------- 심볼 A: N으로 쪼개진 동전
+    save('symbol.svg', svg(800, 800, ncoin(400, 400, 328, pieces=True), (0, 0, 800, 800), bg=INK, label='엔빵 심볼'))
+    save('symbol-coin-only.svg', svg(800, 800, ncoin(400, 400, 390), (0, 0, 800, 800), label='엔빵 심볼'))
+
+    # ---------- 심볼 B: 영수증 위의 N
+    b = receipt(400, 408, 350, 480)
+    b += nglyph(400, 322, 214, 214, 56)
+    b += f'<rect x="293" y="478" width="214" height="28" rx="4" fill="{INK}"/>'
+    b += f'<rect x="293" y="530" width="132" height="28" rx="4" fill="{INK}"/>'
+    save('symbol-alt-receipt.svg', svg(800, 800, b, (0, 0, 800, 800), bg=GOLD, label='엔빵 심볼 (영수증)'))
+
+    # ---------- 심볼 C: 글자 심볼
+    sc = 2.6
+    body_c = letters(ink=INK, coin=PAPER, cut=INK)
+    tx = 400 - (X0 + LW / 2) * sc
+    ty = 400 - 52.5 * sc
+    save('symbol-alt-letters.svg', svg(800, 800, f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc})">{body_c}</g>',
+                                       (0, 0, 800, 800), bg=GOLD, label='엔빵 심볼 (글자)'))
+    print('written to', out)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1] if len(sys.argv) > 1 else 'out', sys.argv[2] if len(sys.argv) > 2 else None)

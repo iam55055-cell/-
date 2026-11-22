@@ -19,6 +19,16 @@ const jobs = [
 
 (async () => {
   const root = path.resolve(process.argv[2] || 'library/brand/enppang');
+  // svg/n0/ 폴더의 변형 심볼도 800px로 내보낸다
+  const n0 = path.join(root, 'svg', 'n0');
+  if (fs.existsSync(n0)) {
+    fs.mkdirSync(path.join(root, 'png', 'n0'), { recursive: true });
+    for (const f of fs.readdirSync(n0).filter((x) => x.endsWith('.svg')).sort()) {
+      // 워드마크는 배경을 투명하게, 심볼은 바탕색 그대로
+      const isWordmark = f.startsWith('wordmark');
+      jobs.push([path.join('n0', f), path.join('n0', f.replace('.svg', isWordmark ? '-1600.png' : '-800.png')), isWordmark ? 1600 : 800, isWordmark]);
+    }
+  }
   const browser = await chromium.launch();
   for (const [svg, png, width, transparent] of jobs) {
     const src = path.join(root, 'svg', svg);
