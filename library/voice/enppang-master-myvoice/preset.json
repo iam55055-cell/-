@@ -1,0 +1,24 @@
+{
+  "name": "엔빵 마스터 보이스 (본인 목소리)",
+  "registered": "2026-11-22",
+  "status": "기준 대본 작성 완료. 레퍼런스 녹음 대기",
+  "source": "진행자 본인 목소리. 엔빵 기준 대본(my-voice-reference.txt) 낭독",
+  "decided": {
+    "voice": "본인 목소리 (2026-11-22 확정)",
+    "slang": "유행어와 감탄사는 제한 없이 쓴다",
+    "numbers": "숫자 제약 없음",
+    "assertion": "단정 표현은 자유롭게 쓴다"
+  },
+  "files": {
+    "transcript": "my-voice-reference.txt (녹음 대본, 공백 제외 361자)",
+    "original": "my-voice-original.* (받은 그대로, 저장소에 올리지 않음)",
+    "reference": "my-voice-reference.wav / .mp3 (정리본, 저장소에 올리지 않음)"
+  },
+  "production": {
+    "method": "미정. 회차마다 직접 녹음하거나, 이 레퍼런스로 목소리 클론을 등록해 만든다",
+    "speed": "미정. 레퍼런스 녹음에서 분당 글자 수를 재서 채운다. 그 전까지 계산 기준은 공백 제외 분당 350자",
+    "cleanup": "70Hz 이하 제거, 약한 잡음 제거 (뉴과 본인 목소리 레퍼런스와 같은 처리)",
+    "loudness": "-16 LUFS"
+  },
+  "guide": "docs/enppang-narrator-master.md"
+}
